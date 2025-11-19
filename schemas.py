@@ -12,10 +12,10 @@ Model name is converted to lowercase for the collection name:
 """
 
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import Optional, List
+from datetime import datetime
 
-# Example schemas (replace with your own):
-
+# Example schemas (keep for reference)
 class User(BaseModel):
     """
     Users collection schema
@@ -38,11 +38,31 @@ class Product(BaseModel):
     category: str = Field(..., description="Product category")
     in_stock: bool = Field(True, description="Whether product is in stock")
 
-# Add your own schemas here:
-# --------------------------------------------------
+# Panny app schemas
+class Conversation(BaseModel):
+    """
+    Conversations collection schema
+    Collection name: "conversation"
+    """
+    title: Optional[str] = Field(None, description="Optional user-friendly title")
+    user_id: Optional[str] = Field(None, description="Anonymous or user identifier")
 
-# Note: The Flames database viewer will automatically:
-# 1. Read these schemas from GET /schema endpoint
-# 2. Use them for document validation when creating/editing
-# 3. Handle all database operations (CRUD) directly
-# 4. You don't need to create any database endpoints!
+class Message(BaseModel):
+    """
+    Messages collection schema
+    Collection name: "message"
+    """
+    conversation_id: str = Field(..., description="Reference to conversation _id (as string)")
+    role: str = Field(..., description="'user' or 'assistant'")
+    content: str = Field(..., description="Message text content")
+    created_at: Optional[datetime] = None
+
+# Optional helper response models (not stored directly)
+class ChatRequest(BaseModel):
+    conversation_id: Optional[str] = None
+    message: str
+
+class ChatResponse(BaseModel):
+    conversation_id: str
+    reply: str
+    messages: Optional[List[Message]] = None
